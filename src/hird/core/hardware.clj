@@ -24,6 +24,12 @@
 (def output-pins
   (reflect/query-class HardwareSimulator ["outputPins" :#]))
 
+(def internal-pins
+  (reflect/query-class HardwareSimulator ["internalPins" :#]))
+
+(def part-pins
+  (reflect/query-class HardwareSimulator ["partPins" :#]))
+
 (def pin-info
   (reflect/query-class Pins ["pins" :#]))
 
@@ -51,6 +57,9 @@
       (clock-tock simulator)
       (clock-tick simulator))))
 
+(defn gui-step [{:keys [controller]}]
+  (.run (step-task controller)))
+
 (defn simulation []
   (let [simulator  (HardwareSimulator. (HardwareSimulatorComponent.))
         gui        (doto (HardwareSimulatorControllerComponent.)
@@ -61,3 +70,22 @@
     {:simulator simulator
      :gui gui
      :controller controller}))
+
+(defn list-pins-info [pins type]
+  (->> (pin-info pins)
+       (map (fn [p] (let [k (keyword (.-name p))]
+                      [k {:name  k
+                          :width (.-width p)
+                          :type type}])))
+       (into {})))
+
+(defn list-pins [simulator]
+  (merge (list-pins-info (input-pins simulator) :input)
+         (list-pins-info (output-pins simulator) :output)
+         (list-pins-info (internal-pins simulator) :internal)))
+
+
+(comment
+  
+  (simulation))
+

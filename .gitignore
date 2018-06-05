@@ -8,3 +8,7 @@ pom.xml.asc
 .hgignore
 .hg/
 .DS_Store
+*.dat
+*.out
+\#*\#
+.\#*
