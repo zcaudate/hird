@@ -15,8 +15,7 @@
       (subs (- 32 len))
       (.replace \space \0)))
 
-(defn set-decimal-val [s]
-  (Short/parseShort s))
+(defn set-decimal-val [s] s)
 
-(defn get-decimal-val [s]
+(defn get-decimal-val [s _]
   (str s))

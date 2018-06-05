@@ -33,6 +33,19 @@
 (def pin-info
   (reflect/query-class Pins ["pins" :#]))
 
+(defn list-pins-info [pins type]
+  (->> (pin-info pins)
+       (map (fn [p] (let [k (keyword (.-name p))]
+                      [k {:name  k
+                          :width (.-width p)
+                          :type type}])))
+       (into {})))
+
+(defn list-pins [simulator]
+  (merge (list-pins-info (input-pins simulator) :input)
+         (list-pins-info (output-pins simulator) :output)
+         (list-pins-info (internal-pins simulator) :internal)))
+         
 (def clock-up?
   (reflect/query-class HardwareSimulator ["clockUp" :#]))
 
@@ -71,21 +84,25 @@
      :gui gui
      :controller controller}))
 
-(defn list-pins-info [pins type]
-  (->> (pin-info pins)
-       (map (fn [p] (let [k (keyword (.-name p))]
-                      [k {:name  k
-                          :width (.-width p)
-                          :type type}])))
-       (into {})))
 
-(defn list-pins [simulator]
-  (merge (list-pins-info (input-pins simulator) :input)
-         (list-pins-info (output-pins simulator) :output)
-         (list-pins-info (internal-pins simulator) :internal)))
+(defn load-chip [{:keys [simulator controller]} path]
+  (load-gate simulator (str path) true)
+  (update-program-file controller (str path)))
 
+(defn select-pin-type [pins type]
+  (reduce-kv (fn [out k opts]
+               (if (= type (:type opts))
+                 (assoc out k opts)
+                 out))
+             {}
+             pins))
+
+(defn chip-template [{:keys [simulator]}]
+  (let [pins (list-pins simulator)]
+    (->> [:input :output :internal]
+         (map (fn [k] [k (select-pin-type pins k)]))
+         (into {}))))
 
 (comment
-  
   (simulation))
 
