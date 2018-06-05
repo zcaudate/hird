@@ -1,5 +1,5 @@
 (defproject zcaudate/hird "0.1.0-SNAPSHOT"
-  :description "Simulator library for nand2tetris"
+  :description "simulations for nand2tetris"
   :url "http://www.github.com/zcaudate/hird"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
