@@ -26,7 +26,6 @@
       [{:a "1", :b "0"} {:out "0"}]
       [{:a "1", :b "1"} {:out "1"}]])
 
-
 (fact "And16 Gate"
   
   (test-chip "And16" *opts*)
@@ -307,4 +306,7 @@
           '=> true
           
           (list 'eval-chip i '*opts*)
-          '=> (eval-chip i *opts*))))
+          '=> (eval-chip i *opts*)))
+  
+  
+  )

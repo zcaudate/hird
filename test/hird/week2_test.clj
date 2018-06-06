@@ -7,6 +7,11 @@
 (def ^:dynamic *opts* {:update :instant
                        :format :binary})
 
+(fact "List All Gates"
+
+  (list-chips *dir*)
+  => ["ALU" "Add16" "FullAdder" "HalfAdder" "Inc16"])
+
 (fact "ALU Gate"
 
   (test-chip "ALU" *opts*)
