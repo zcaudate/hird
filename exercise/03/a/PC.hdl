@@ -10,11 +10,22 @@
  * else if (inc[t] == 1)   out[t+1] = out[t] + 1  (integer addition)
  * else                    out[t+1] = out[t]
  */
+ 
+/*
+
+ ->
+
+*/ 
 
 CHIP PC {
     IN in[16],load,inc,reset;
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    Register(in=x4, load=true, out=out, out=x0);
+    
+    Inc16(in=x0, out=x1);
+    Mux16(sel=inc,   a=x0, b=x1, out=x2);
+    Mux16(sel=load,  a=x2, b=in, out=x3);
+    Mux16(sel=reset, a=x3, b=false, out=x4);
 }
