@@ -39,5 +39,81 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    
+    // INSTRUCTION
+    // (i) xx a cccccc ddd jjj
+    
+    // controlA as !instruction[15]
+    Not(in=instruction[15], out=controlA);
+    // controlC as !!instruction[15]
+    Not(in=controlA, out=controlC);
+    
+    // (i) xx a cccccc (d)dd jjj
+    // Set controlALUtoA if controlC and instruction[5]
+    And(a=controlC, b=instruction[5], out=controlALUtoA);   
+    
+    // Select instruction or outALU to inputA on controlALUtoA
+    Mux16(a=instruction, b=outALU, sel=controlALUtoA, out=inputA); 
+    
+    // loadA if controlA or controlALUtoA
+    Or(a=controlA, b=controlALUtoA, out=loadA);
+    
+    // Declare A Register    
+    ARegister(in=inputA, load=loadA, out=outA);
+    
+    // select A or M for inALU
+    // i xx (a) cccccc ddd jjj
+    Mux16(a=outA, b=inM, sel=instruction[12], out=inALU);   
+    
+    // loadD if controlC and instruction[4]
+    // i xx a cccccc d(d)d jjj
+    And(a=controlC, b=instruction[4], out=loadD);
+    
+    // Declare D Register
+    DRegister(in=outALU, load=loadD, out=outD);    
+    
+    // Declare ALU
+    // i xx a (c)(c)(c)(c)(c)(c) d(d)d jjj
+    ALU(x=outD, y=inALU, zx=instruction[11], nx=instruction[10], 
+        zy=instruction[9], ny=instruction[8], f=instruction[7],
+        no=instruction[6], out=outALU, zr=outZR, ng=outNG); // calculate
+        
+    // outA[0..14] => addressM
+    Or16(a=false, b=outA, out[0..14]=addressM);
+    
+    // Set outALU to outputM of chip
+    Or16(a=false, b=outALU, out=outM);
+
+    // Set writeM of chip on controlC and instruction[3]
+    // i xx a cccccc dd(d) jjj
+    And(a=controlC, b=instruction[3], out=writeM);
+    
+    // Settings for `jeq`
+    // i xx a cccccc ddd j(j)j
+    And(a=outZR, b=instruction[1], out=jeq);    // is zero and jump if zero
+
+    // Settings for `jlt`
+    // i xx a cccccc ddd (j)jj 
+    And(a=outNG, b=instruction[2], out=jlt);    // is neg and jump if neg
+    
+    // Setting outputPositive and outputNotPositive
+    Or(a=outZR, b=outNG, out=outputNotPositive);
+    Not(in=outputNotPositive, out=outputPositive); 
+
+    // Settings for `jgt`
+    // i xx a cccccc ddd jj(j)   
+    And(a=outputPositive, b=instruction[0], out=jgt); // is pos and jump if pos
+    
+    // Set controlJumpA if either `jeq`, `jlt` or `jgt`
+    Or(a=jeq, b=jlt, out=jle);
+    Or(a=jle, b=jgt, out=controlJumpA);              
+    
+    // loadPC if controlC and controlJumpA 
+    And(a=controlC, b=controlJumpA, out=loadPC);
+    
+    // controlPCinc if not loadPC
+    Not(in=loadPC, out=controlPCinc);
+    
+    // Declare PC
+    PC(in=outA, inc=controlPCinc, load=loadPC, reset=reset, out[0..14]=pc);
 }

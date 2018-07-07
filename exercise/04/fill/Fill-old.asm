@@ -12,54 +12,59 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+        
+(LOOP)
+  @KBD
+  D=M         // D = KBD;   
 
+  @BLACK
+  D;JGT
+  @WHITE
+  0;JMP       // if KBD > 0: BLACK, ELSE: WHITE
+    
+(WHITE)
+  @color
+  M=0
+
+  @DRAW
+  0;JMP        // Set color to 0b0000000000000000 and DRAW
+
+(BLACK)
+  @color
+  M=-1
+
+  @DRAW
+  0;JMP        // Set color to 0b1111111111111111 and DRAW
+
+(DRAW)
 
   @8192
   D=A
-  @count
-  M=D     // count = 8192;
-
-(DRAWSCREEN)
   @i
-  M=0     // i = 0;
+  M=D           // total = 8192;
   
-(DRAWPIXEL)
-  @KBD
-  D=M
-  
-  @WHITE
-  D;JEQ   
-  
-  @BLACK
-  0;JMP   // if (KBD == 0): goto WHITE, ELSE: goto BLACK;
+  (DRAWPIXEL)
+    @i
+    D=M
+    @pos
+    M=D
+    @SCREEN
+    D=A
+    @pos
+    M=M+D
 
-(BLACK)
-  @i
-  D=M
-  @SCREEN
-  A=A+D   
-  M=-1    // [i+SCREEN] = -1;
+    @color
+    D=M
+    @pos
+    A=M
+    M=D
+
+    @i
+    D=M-1
+    M=D
+
+    @DRAWPIXEL
+    D;JGE
   
-  @NEXT
+  @LOOP
   0;JMP
-
-(WHITE)
-  @i
-  D=M
-  @SCREEN
-  A=A+D   
-  M=0     // [i+SCREEN] = 0;
-
-  @NEXT
-  0;JMP
-        
-(NEXT)   
-  @i
-  MD=M+1  // i++;
-  @count
-  D=M-D
-  @DRAWPIXEL
-  D;JGT      // if(count-i > 0): goto DRAWPIXEL;
-  
-  @DRAWSCREEN
-  0;JMP      // ELSE goto DRAWSCREEN;
